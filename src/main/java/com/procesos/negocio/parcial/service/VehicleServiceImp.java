@@ -5,10 +5,14 @@ import com.procesos.negocio.parcial.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class VehicleServiceImp implements VehicleService{
@@ -22,13 +26,35 @@ public class VehicleServiceImp implements VehicleService{
     @Autowired
     private VehicleRepository vehicleRepository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Transactional
     @Override
     public void saveVehiclesFromApi() {
-        ResponseEntity<Vehicle[]> response = restTemplate.getForEntity(baseUrl, Vehicle[].class);
-        Vehicle[] vehicles = response.getBody();
 
-        for (Vehicle vehicle : vehicles) {
-            vehicleRepository.save(vehicle);
+        List<Vehicle> vehicles = vehicleRepository.findAll();
+
+        Vehicle[] response = restTemplate.getForObject(baseUrl, Vehicle[].class);
+
+        List<String> localVins = vehicles.stream()
+                .map(Vehicle::getCarVin)
+                .collect(Collectors.toList());
+
+        List<Vehicle> externalVehicles = Arrays.stream(response)
+                .filter(vehicle -> !localVins.contains(vehicle.getCarVin()))
+                .collect(Collectors.toList());
+
+        vehicleRepository.saveAll(externalVehicles);
+    }
+
+    @Override
+    public Boolean deleteAllVehicles() {
+        try {
+            vehicleRepository.deleteAll();
+            return true;
+        }catch (Exception e) {
+            return false;
         }
     }
 

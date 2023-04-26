@@ -73,4 +73,18 @@ public class VehicleController {
             return new ResponseEntity<>("Error al actualizar el vehiculo: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @DeleteMapping("/delVehicles")
+    public ResponseEntity deleteAll(){
+        Boolean result = vehicleService.deleteAllVehicles();
+        try {
+            if (!result) {
+                return new ResponseEntity<>("No hay vehiculos en la base de datos", HttpStatus.NO_CONTENT);
+            }else {
+                return new ResponseEntity<>("Vehiculos eliminados de la base de datos", HttpStatus.NO_CONTENT);
+            }
+        }catch (Exception e) {
+            return new ResponseEntity<>("Error al eliminar vehiculos de la base de datos" + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

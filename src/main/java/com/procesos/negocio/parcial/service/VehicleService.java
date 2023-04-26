@@ -11,5 +11,7 @@ public interface VehicleService {
     Boolean createVehicle(Vehicle vehicle);
     Boolean updateVehicle(Long id, Vehicle vehicle);
 
+    Boolean deleteAllVehicles();
+
     void saveVehiclesFromApi();
 }
