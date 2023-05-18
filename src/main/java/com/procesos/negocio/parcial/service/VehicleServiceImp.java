@@ -87,7 +87,6 @@ public class VehicleServiceImp implements VehicleService{
             vehicleBD.setCarColor(vehicle.getCarColor());
             vehicleBD.setCarType(vehicle.getCarType());
             vehicleBD.setCarFuel(vehicle.getCarFuel());
-            vehicleBD.setCarVin(vehicle.getCarVin());
 
             Vehicle vehicleUp = vehicleRepository.save(vehicleBD);
             return true;

@@ -2,6 +2,8 @@ package com.procesos.negocio.parcial.controllers;
 
 import com.procesos.negocio.parcial.models.Vehicle;
 import com.procesos.negocio.parcial.service.VehicleService;
+import com.procesos.negocio.parcial.utils.ApiResponse;
+import com.procesos.negocio.parcial.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,79 +14,85 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/parcial")
+@RequestMapping("/api/parcial/vehicle")
 public class VehicleController {
 
     @Autowired
     private VehicleService vehicleService;
 
-    @GetMapping("/vehicles")
+    private ApiResponse apiResponse;
+
+    @GetMapping("")
     public ResponseEntity<List<Vehicle>> getAllCars(){
         try {
-            return new ResponseEntity<>(vehicleService.getAllVehicles(), HttpStatus.OK);
+            apiResponse = new ApiResponse(Constants.REGISTER_LIST, vehicleService.getAllVehicles());
+            return new ResponseEntity(apiResponse, HttpStatus.OK);
         }catch (Exception e){
-            return new ResponseEntity("No se encontraron vehiculos", HttpStatus.NOT_FOUND);
+            apiResponse = new ApiResponse(Constants.REGISTER_NOT_FOUND, "");
+            return new ResponseEntity(apiResponse, HttpStatus.NOT_FOUND);
         }
     }
 
-    @PostMapping("/save/vehicles")
+    @PostMapping("/save/api")
     public ResponseEntity<Void> saveVehicles() {
         vehicleService.saveVehiclesFromApi();
-        return ResponseEntity.ok().build();
+        return new ResponseEntity(Constants.EXTERNAL_DATA_API, HttpStatus.OK);
     }
 
-    @GetMapping("/vehicle/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity findVehiclesById(@PathVariable("id") Long id){
-        Map response = new HashMap();
         try{
-            return new ResponseEntity(vehicleService.getVehicle(id), HttpStatus.OK);
+            apiResponse = new ApiResponse(Constants.REGISTER_FOUND, vehicleService.getVehicle(id));
+            return new ResponseEntity(apiResponse, HttpStatus.OK);
         }catch (Exception e){
-            response.put("status", "404");
-            response.put("message","No se encontraron vehiculos!");
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            apiResponse = new ApiResponse(Constants.REGISTER_NOT_FOUND, "");
+            return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
         }
     }
 
-    @PostMapping("/vehicle")
+    @PostMapping("")
     public ResponseEntity saveVehicle(@RequestBody Vehicle vehicle){
-        Map response = new HashMap();
         Boolean vehicleRes = vehicleService.createVehicle(vehicle);
 
         if (vehicleRes){
-            response.put("status", "201");
-            response.put("message", "Se creo el vehiculo");
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
+            apiResponse = new ApiResponse(Constants.REGISTER_CREATE, "");
+            return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
         }
-        response.put("status", "400");
-        response.put("message", "Error al crear un vehiculo");
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        apiResponse = new ApiResponse(Constants.REGISTER_BAD, vehicle);
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @PutMapping("/vehicle/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<String> updateVehicle(@PathVariable("id") Long id, @RequestBody Vehicle vehicle) {
         try {
             Boolean result = vehicleService.updateVehicle(id, vehicle);
             if (result) {
-                return new ResponseEntity<>("Vehiculo con id " + id + " ha sido actualizado", HttpStatus.OK);
+                apiResponse = new ApiResponse(Constants.REGISTER_UPDATE, "");
+                return new ResponseEntity(apiResponse, HttpStatus.OK);
             } else {
-                return new ResponseEntity<>("Vehiculo con id " + id + " no se encuentra registrado", HttpStatus.NOT_FOUND);
+                apiResponse = new ApiResponse(Constants.REGISTER_NOT_FOUND, "");
+                return new ResponseEntity(apiResponse, HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
-            return new ResponseEntity<>("Error al actualizar el vehiculo: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            apiResponse = new ApiResponse(Constants.REGISTER_ERROR_UPDATE, e.getMessage());
+            return new ResponseEntity(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @DeleteMapping("/delVehicles")
+    @DeleteMapping("/del")
     public ResponseEntity deleteAll(){
         Boolean result = vehicleService.deleteAllVehicles();
         try {
             if (!result) {
-                return new ResponseEntity<>("No hay vehiculos en la base de datos", HttpStatus.NO_CONTENT);
+                apiResponse = new ApiResponse(Constants.REGISTER_NOT_FOUND, "");
+                return new ResponseEntity<>(apiResponse, HttpStatus.NO_CONTENT);
             }else {
-                return new ResponseEntity<>("Vehiculos eliminados de la base de datos", HttpStatus.NO_CONTENT);
+                apiResponse = new ApiResponse(Constants.REGISTER_DELETE, "");
+                return new ResponseEntity<>(apiResponse, HttpStatus.NO_CONTENT);
             }
         }catch (Exception e) {
-            return new ResponseEntity<>("Error al eliminar vehiculos de la base de datos" + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            apiResponse = new ApiResponse(Constants.REGISTER_ERROR_DELETE, e.getMessage());
+            return new ResponseEntity(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

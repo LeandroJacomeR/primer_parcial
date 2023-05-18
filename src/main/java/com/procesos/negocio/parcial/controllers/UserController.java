@@ -38,7 +38,7 @@ public class UserController {
     public ResponseEntity saveUser(@RequestBody User user){
         Boolean userRes = userService.createUser(user);
 
-        if (userRes == true){
+        if (userRes){
             apiResponse = new ApiResponse(Constants.REGISTER_CREATE, "");
             return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
         }
@@ -73,13 +73,4 @@ public class UserController {
             return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 }
-
-
-
-
-
-
-
-
