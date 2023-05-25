@@ -1,6 +1,7 @@
 package com.procesos.negocio.parcial.service;
 
 import com.procesos.negocio.parcial.models.Vehicle;
+import com.procesos.negocio.parcial.repository.UserRepository;
 import com.procesos.negocio.parcial.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +25,9 @@ public class VehicleServiceImp implements VehicleService{
 
     @Autowired
     private VehicleRepository vehicleRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -70,8 +74,15 @@ public class VehicleServiceImp implements VehicleService{
     @Override
     public Boolean createVehicle(Vehicle vehicle) {
         try {
-            vehicleRepository.save(vehicle);
-            return true;
+            Vehicle existingVehicle = vehicleRepository.findByCarVin(vehicle.getCarVin());
+
+            if (existingVehicle == null) {
+                vehicleRepository.save(vehicle);
+                return true;
+            }else{
+                return false;
+            }
+
         }catch (Exception e) {
             return false;
         }

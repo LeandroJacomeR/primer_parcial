@@ -40,7 +40,7 @@ public class VehicleController {
     }
 
     @PostMapping("/save/api")
-    public ResponseEntity<Void> saveVehicles(@RequestHeader(value = "Authorization") String token) {
+    public ResponseEntity<Void> saveVehicles(Long idVehicle, Long idUser, @RequestHeader(value = "Authorization") String token) {
         if(!validateToken(token)){
             return new ResponseEntity(Constants.TOKEN_INVALID, HttpStatus.UNAUTHORIZED);
         }
