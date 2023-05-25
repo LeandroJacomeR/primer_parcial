@@ -16,6 +16,8 @@ public class Constants {
     public static final String USER_LOGIN = "Usuario logueado!";
     public static final String EXTERNAL_DATA_API = "Datos creados correctamente";
 
+    public static final String TOKEN_INVALID = "Token no valido";
     private Constants(){}
+
 
 }

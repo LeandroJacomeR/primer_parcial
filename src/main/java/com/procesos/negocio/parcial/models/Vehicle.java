@@ -20,16 +20,18 @@ public class Vehicle {
     private Long id;
 
     private String car;
-    @Column(name = "car_model")
+    @Column(name = "car_model", nullable = false)
     private String carModel;
-    @Column(name = "car_color")
+    @Column(name = "car_color", nullable = false)
     private String carColor;
-    @Column(name = "car_type")
+    @Column(name = "car_type", nullable = false)
     private String carType;
-    @Column(name = "car_fuel")
+    @Column(name = "car_fuel", nullable = false)
     private String carFuel;
-    @Column(name = "car_vin")
+    @Column(name = "car_vin", length = 13, nullable = false)
     private String carVin;
+
+
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id")
