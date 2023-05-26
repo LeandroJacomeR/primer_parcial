@@ -14,7 +14,6 @@ public class Constants {
     public static final String PASSWORD_INCORRECT = "Contraseña incorrecta!";
     public static final String USER_NOT_FOUND = "Usuario no encontrado!";
     public static final String USER_LOGIN = "Usuario logueado!";
-    public static final String EXTERNAL_DATA_API = "Datos creados correctamente";
     public static final String TOKEN_INVALID = "Token no valido";
 
     private Constants(){}

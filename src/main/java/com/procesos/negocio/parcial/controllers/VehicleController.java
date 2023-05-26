@@ -1,5 +1,6 @@
 package com.procesos.negocio.parcial.controllers;
 
+import com.procesos.negocio.parcial.dto.VehicleRequestDTO;
 import com.procesos.negocio.parcial.models.Vehicle;
 import com.procesos.negocio.parcial.service.VehicleService;
 import com.procesos.negocio.parcial.utils.ApiResponse;
@@ -40,12 +41,15 @@ public class VehicleController {
     }
 
     @PostMapping("/save/api")
-    public ResponseEntity<Void> saveVehicles(Long idVehicle, Long idUser, @RequestHeader(value = "Authorization") String token) {
+    public ResponseEntity<String> saveVehicles(@RequestBody VehicleRequestDTO requestDTO, @RequestHeader(value = "Authorization") String token) {
         if(!validateToken(token)){
             return new ResponseEntity(Constants.TOKEN_INVALID, HttpStatus.UNAUTHORIZED);
         }
-        vehicleService.saveVehiclesFromApi();
-        return new ResponseEntity(Constants.EXTERNAL_DATA_API, HttpStatus.OK);
+        Boolean apiSave = vehicleService.saveVehiclesFromApi(requestDTO.getIdVehicle(), requestDTO.getIdUser());
+        if (apiSave){
+            return new ResponseEntity(Constants.REGISTER_CREATE, HttpStatus.CREATED);
+        }
+        return new ResponseEntity(Constants.REGISTER_BAD, HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("/{id}")

@@ -13,5 +13,5 @@ public interface VehicleService {
 
     Boolean deleteAllVehicles();
 
-    void saveVehiclesFromApi();
+    Boolean saveVehiclesFromApi(Long idVehicle, Long idUser);
 }

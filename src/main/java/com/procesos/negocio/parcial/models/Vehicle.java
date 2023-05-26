@@ -28,7 +28,7 @@ public class Vehicle {
     private String carType;
     @Column(name = "car_fuel", nullable = false)
     private String carFuel;
-    @Column(name = "car_vin", length = 13, nullable = false)
+    @Column(name = "car_vin", length = 20, nullable = false)
     private String carVin;
 
 

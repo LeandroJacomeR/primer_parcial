@@ -1,15 +1,19 @@
 package com.procesos.negocio.parcial.service;
 
+import com.procesos.negocio.parcial.dto.VehicleDTO;
+import com.procesos.negocio.parcial.models.User;
 import com.procesos.negocio.parcial.models.Vehicle;
 import com.procesos.negocio.parcial.repository.UserRepository;
 import com.procesos.negocio.parcial.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import javax.persistence.NonUniqueResultException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,26 +33,36 @@ public class VehicleServiceImp implements VehicleService{
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Transactional
     @Override
-    public void saveVehiclesFromApi() {
+    public Boolean saveVehiclesFromApi(Long idVehicle, Long idUser) {
 
-        List<Vehicle> vehicles = vehicleRepository.findAll();
+        User user = userRepository.findById(idUser).get();
+        String url = baseUrl + "/" + idVehicle;
+        ResponseEntity<VehicleDTO> response = restTemplate.getForEntity(url, VehicleDTO.class);
 
-        Vehicle[] response = restTemplate.getForObject(baseUrl, Vehicle[].class);
+        if (response.getStatusCode().is2xxSuccessful()) {
+            VehicleDTO vehicleDTO = response.getBody();
+            boolean vinExists = vehicleRepository.existsByCarVin(vehicleDTO.getCarVin());
 
-        List<String> localVins = vehicles.stream()
-                .map(Vehicle::getCarVin)
-                .collect(Collectors.toList());
+                if (!vinExists) {
+                    // El VIN ya existe en la base de datos
+                    return false;
+                }
 
-        List<Vehicle> externalVehicles = Arrays.stream(response)
-                .filter(vehicle -> !localVins.contains(vehicle.getCarVin()))
-                .collect(Collectors.toList());
+                Vehicle vehicle = new Vehicle();
+                vehicle.setCar(vehicleDTO.getCar());
+                vehicle.setCarModel(vehicleDTO.getCarModel());
+                vehicle.setCarColor(vehicleDTO.getCarColor());
+                vehicle.setCarType(vehicleDTO.getCarType());
+                vehicle.setCarFuel(vehicleDTO.getCarFuel());
+                vehicle.setCarVin(vehicleDTO.getCarVin());
+                vehicle.setUser(user);
+                vehicleRepository.save(vehicle);
 
-        vehicleRepository.saveAll(externalVehicles);
+                return true;
+
+        }
+        return false;
     }
 
     @Override
