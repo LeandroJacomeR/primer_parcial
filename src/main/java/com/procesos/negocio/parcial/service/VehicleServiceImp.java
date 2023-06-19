@@ -8,15 +8,10 @@ import com.procesos.negocio.parcial.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import javax.persistence.NonUniqueResultException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class VehicleServiceImp implements VehicleService{
@@ -44,23 +39,22 @@ public class VehicleServiceImp implements VehicleService{
             VehicleDTO vehicleDTO = response.getBody();
             boolean vinExists = vehicleRepository.existsByCarVin(vehicleDTO.getCarVin());
 
-                if (!vinExists) {
-                    // El VIN ya existe en la base de datos
-                    return false;
-                }
+            if (!vinExists) {
+                // El VIN ya existe en la base de datos
+                return false;
+            }
 
-                Vehicle vehicle = new Vehicle();
-                vehicle.setCar(vehicleDTO.getCar());
-                vehicle.setCarModel(vehicleDTO.getCarModel());
-                vehicle.setCarColor(vehicleDTO.getCarColor());
-                vehicle.setCarType(vehicleDTO.getCarType());
-                vehicle.setCarFuel(vehicleDTO.getCarFuel());
-                vehicle.setCarVin(vehicleDTO.getCarVin());
-                vehicle.setUser(user);
-                vehicleRepository.save(vehicle);
+            Vehicle vehicle = new Vehicle();
+            vehicle.setCar(vehicleDTO.getCar());
+            vehicle.setCarModel(vehicleDTO.getCarModel());
+            vehicle.setCarColor(vehicleDTO.getCarColor());
+            vehicle.setCarType(vehicleDTO.getCarType());
+            vehicle.setCarFuel(vehicleDTO.getCarFuel());
+            vehicle.setCarVin(vehicleDTO.getCarVin());
+            vehicle.setUser(user);
 
-                return true;
-
+            vehicleRepository.save(vehicle);
+            return true;
         }
         return false;
     }
