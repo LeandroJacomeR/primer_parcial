@@ -4,6 +4,7 @@ import com.procesos.negocio.parcial.models.User;
 import com.procesos.negocio.parcial.service.UserService;
 import com.procesos.negocio.parcial.utils.ApiResponse;
 import com.procesos.negocio.parcial.utils.Constants;
+import com.procesos.negocio.parcial.utils.SecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +23,16 @@ public class UserController {
 
     private ApiResponse apiResponse;
 
+    @Autowired
+    private SecurityConfig securityConfig;
+
     Map data = new HashMap();
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity findUserById(@PathVariable Long id){
+    public ResponseEntity findUserById(@PathVariable Long id, @RequestHeader(name = "Authorization") String token){
+        if(!securityConfig.validateToken(token)){
+            return new ResponseEntity("Token no valido!", HttpStatus.UNAUTHORIZED);
+        }
         try{
             apiResponse = new ApiResponse(Constants.REGISTER_FOUND, userService.getUser(id));
             return new ResponseEntity(apiResponse, HttpStatus.OK);
@@ -38,17 +45,21 @@ public class UserController {
     @PostMapping(value = "")
     public ResponseEntity saveUser(@RequestBody User user){
         Boolean userRes = userService.createUser(user);
+        System.out.println(user);
 
         if (userRes){
-            apiResponse = new ApiResponse(Constants.REGISTER_CREATE, "");
+            apiResponse = new ApiResponse(Constants.REGISTER_CREATE, user);
             return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
         }
-        apiResponse = new ApiResponse(Constants.REGISTER_BAD, user);
+        apiResponse = new ApiResponse(Constants.REGISTER_BAD, "");
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping(value = "")
-    public ResponseEntity allUser(){
+    public ResponseEntity allUser(@RequestHeader(name = "Authorization") String token){
+        if(!securityConfig.validateToken(token)){
+            return new ResponseEntity("Token no valido!", HttpStatus.UNAUTHORIZED);
+        }
         try{
             apiResponse = new ApiResponse(Constants.REGISTER_LIST, userService.allUsers());
             return new ResponseEntity(apiResponse, HttpStatus.OK);

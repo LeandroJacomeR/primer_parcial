@@ -31,7 +31,7 @@ public class User {
     private String email;
     @Column(length = 64, nullable = false)
     private String password;
-    @Column(length = 30, nullable = false)
+    @Column(length = 30)
     private Date birthday;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
