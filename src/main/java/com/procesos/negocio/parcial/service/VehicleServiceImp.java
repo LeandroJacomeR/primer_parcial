@@ -60,16 +60,6 @@ public class VehicleServiceImp implements VehicleService{
     }
 
     @Override
-    public Boolean deleteAllVehicles() {
-        try {
-            vehicleRepository.deleteAll();
-            return true;
-        }catch (Exception e) {
-            return false;
-        }
-    }
-
-    @Override
     public List<Vehicle> getAllVehicles() {
         return vehicleRepository.findAll();
     }
@@ -108,6 +98,16 @@ public class VehicleServiceImp implements VehicleService{
             vehicleBD.setCarFuel(vehicle.getCarFuel());
 
             Vehicle vehicleUp = vehicleRepository.save(vehicleBD);
+            return true;
+        }catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
+    public Boolean deleteVehicle(Long id) {
+        try {
+            vehicleRepository.deleteById(id);
             return true;
         }catch (Exception e) {
             return false;

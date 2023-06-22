@@ -6,6 +6,7 @@ import com.procesos.negocio.parcial.service.VehicleService;
 import com.procesos.negocio.parcial.utils.ApiResponse;
 import com.procesos.negocio.parcial.utils.Constants;
 import com.procesos.negocio.parcial.utils.JWTUtil;
+import com.procesos.negocio.parcial.utils.SecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/parcial/vehicle")
+@RequestMapping("/api/vehicle")
 @CrossOrigin
 public class VehicleController {
 
@@ -22,7 +23,7 @@ public class VehicleController {
     private VehicleService vehicleService;
 
     @Autowired
-    private JWTUtil jwtUtil;
+    private SecurityConfig securityConfig;
 
     private ApiResponse apiResponse;
 
@@ -30,7 +31,7 @@ public class VehicleController {
     public ResponseEntity<List<Vehicle>> getAllCars(@RequestHeader(value = "Authorization") String token){
         //System.out.println(token);
         try {
-            if(!validateToken(token)){
+            if(!securityConfig.validateToken(token)){
                 return new ResponseEntity(Constants.TOKEN_INVALID, HttpStatus.UNAUTHORIZED);
             }
             apiResponse = new ApiResponse(Constants.REGISTER_LIST, vehicleService.getAllVehicles());
@@ -43,7 +44,7 @@ public class VehicleController {
 
     @PostMapping("/save/api")
     public ResponseEntity<String> saveVehicles(@RequestBody VehicleRequestDTO requestDTO, @RequestHeader(value = "Authorization") String token) {
-        if(!validateToken(token)){
+        if(!securityConfig.validateToken(token)){
             return new ResponseEntity(Constants.TOKEN_INVALID, HttpStatus.UNAUTHORIZED);
         }
         Boolean apiSave = vehicleService.saveVehiclesFromApi(requestDTO.getIdVehicle(), requestDTO.getIdUser());
@@ -57,7 +58,7 @@ public class VehicleController {
     public ResponseEntity findVehiclesById(@PathVariable("id") Long id,
                                            @RequestHeader(value = "Authorization") String token){
         try{
-            if(!validateToken(token)){
+            if(!securityConfig.validateToken(token)){
                 return new ResponseEntity(Constants.TOKEN_INVALID, HttpStatus.UNAUTHORIZED);
             }
             apiResponse = new ApiResponse(Constants.REGISTER_FOUND, vehicleService.getVehicle(id));
@@ -73,14 +74,14 @@ public class VehicleController {
                                       @RequestHeader(value = "Authorization") String token){
         Boolean vehicleRes = vehicleService.createVehicle(vehicle);
 
-        if(!validateToken(token)){
+        if(!securityConfig.validateToken(token)){
             return new ResponseEntity(Constants.TOKEN_INVALID, HttpStatus.UNAUTHORIZED);
         }
         if (vehicleRes){
-            apiResponse = new ApiResponse(Constants.REGISTER_CREATE, "");
+            apiResponse = new ApiResponse(Constants.REGISTER_CREATE, vehicle);
             return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
         }
-        apiResponse = new ApiResponse(Constants.REGISTER_BAD, vehicle);
+        apiResponse = new ApiResponse(Constants.REGISTER_BAD, "");
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
@@ -89,7 +90,7 @@ public class VehicleController {
                                                 @RequestBody Vehicle vehicle,
                                                 @RequestHeader(value = "Authorization") String token) {
         try {
-            if(!validateToken(token)){
+            if(!securityConfig.validateToken(token)){
                 return new ResponseEntity(Constants.TOKEN_INVALID, HttpStatus.UNAUTHORIZED);
             }
             Boolean result = vehicleService.updateVehicle(id, vehicle);
@@ -106,34 +107,20 @@ public class VehicleController {
         }
     }
 
-    @DeleteMapping("/del")
-    public ResponseEntity deleteAll(@RequestHeader(value = "Authorization") String token){
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteVehicle(@PathVariable("id") Long id, @RequestHeader(value = "Authorization") String token){
         try {
-            if(!validateToken(token)){
-                return new ResponseEntity(Constants.TOKEN_INVALID, HttpStatus.UNAUTHORIZED);
-            }
-            Boolean result = vehicleService.deleteAllVehicles();
-            if (!result) {
+            Boolean result = vehicleService.deleteVehicle(id);
+            if (result) {
+                apiResponse = new ApiResponse(Constants.REGISTER_DELETE, "");
+                return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+            } else {
                 apiResponse = new ApiResponse(Constants.REGISTER_NOT_FOUND, "");
-                return new ResponseEntity<>(apiResponse, HttpStatus.NO_CONTENT);
+                return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
             }
-            apiResponse = new ApiResponse(Constants.REGISTER_DELETE, "");
-            return new ResponseEntity<>(apiResponse, HttpStatus.NO_CONTENT);
-        }catch (Exception e) {
+        } catch (Exception e) {
             apiResponse = new ApiResponse(Constants.REGISTER_ERROR_DELETE, e.getMessage());
-            return new ResponseEntity(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    private Boolean validateToken(String token){
-        try{
-            if(jwtUtil.getKey(token) != null){
-                return true;
-            }
-            return  false;
-        }catch (Exception e){
-            return  false;
+            return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

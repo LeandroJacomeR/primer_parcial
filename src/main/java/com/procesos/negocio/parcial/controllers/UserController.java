@@ -26,8 +26,6 @@ public class UserController {
     @Autowired
     private SecurityConfig securityConfig;
 
-    Map data = new HashMap();
-
     @GetMapping(value = "/{id}")
     public ResponseEntity findUserById(@PathVariable Long id, @RequestHeader(name = "Authorization") String token){
         if(!securityConfig.validateToken(token)){
@@ -45,7 +43,7 @@ public class UserController {
     @PostMapping(value = "")
     public ResponseEntity saveUser(@RequestBody User user){
         Boolean userRes = userService.createUser(user);
-        System.out.println(user);
+        //System.out.println(user);
 
         if (userRes){
             apiResponse = new ApiResponse(Constants.REGISTER_CREATE, user);
@@ -82,6 +80,23 @@ public class UserController {
             }
         } catch (Exception e) {
             apiResponse = new ApiResponse(Constants.REGISTER_ERROR_UPDATE, e.getMessage());
+            return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity deleteUser(@PathVariable("id") Long id, @RequestHeader(value = "Authorization") String token) {
+        try {
+            Boolean result = userService.deleteUser(id);
+            if (result) {
+                apiResponse = new ApiResponse(Constants.REGISTER_DELETE, "");
+                return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+            } else {
+                apiResponse = new ApiResponse(Constants.REGISTER_NOT_FOUND, "");
+                return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            apiResponse = new ApiResponse(Constants.REGISTER_ERROR_DELETE, e.getMessage());
             return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

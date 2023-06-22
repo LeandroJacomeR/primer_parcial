@@ -62,6 +62,16 @@ public class UserServiceImp implements UserService{
     }
 
     @Override
+    public Boolean deleteUser(Long id) {
+        try {
+            userRepository.deleteById(id);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+
+    @Override
     public String login(User user) {
         Optional<User> userBD = userRepository.findByEmail(user.getEmail());
         if (userBD.isEmpty()){

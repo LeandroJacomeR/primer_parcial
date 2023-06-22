@@ -10,8 +10,6 @@ public interface VehicleService {
     Vehicle getVehicle(Long id);
     Boolean createVehicle(Vehicle vehicle);
     Boolean updateVehicle(Long id, Vehicle vehicle);
-
-    Boolean deleteAllVehicles();
-
+    Boolean deleteVehicle(Long id);
     Boolean saveVehiclesFromApi(Long idVehicle, Long idUser);
 }
